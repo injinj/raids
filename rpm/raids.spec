@@ -11,12 +11,12 @@ BuildRoot:	${_tmppath}
 Prefix:	        /usr
 BuildRequires:  gcc-c++
 BuildRequires:  chrpath
-BuildRequires:  raikv
-BuildRequires:  raimd
-BuildRequires:  rdbparser
-BuildRequires:  h3lib
-BuildRequires:  libdecnumber
-BuildRequires:  linecook
+BuildRequires:  raikv _raikv_dep
+BuildRequires:  raimd _raimd_dep
+BuildRequires:  rdbparser _rdbparser_dep
+BuildRequires:  h3lib _h3lib_dep
+BuildRequires:  libdecnumber _libdecnumber_dep
+BuildRequires:  linecook _linecook_dep
 BuildRequires:  pcre2-devel
 BuildRequires:  git-core
 BuildRequires:  liblzf-devel
