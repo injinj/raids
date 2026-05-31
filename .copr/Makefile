@@ -16,6 +16,7 @@ rpm_src_dir := rpmbuild/SOURCES/$(name)-$(version)
 srctree     := .git console src include GNUmakefile config .copr deb rpm test doc README.md graph
 release     := $(shell if [ -x /bin/rpmspec ] ; then \
                    /bin/rpmspec -q rpm/$(name).spec | head -1 | sed 's/.*999.999-99999.//' | sed 's/.src//' ; fi)
+-include build_depends.mak
 
 .PHONY: srpm
 srpm: $(outdir)/$(name_ver).$(release).src.rpm

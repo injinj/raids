@@ -306,8 +306,6 @@ ds_lib      := $(libd)/libraids.a
 rpath       := -Wl,-rpath,$(pwd)/$(libd)$(rpath1)$(rpath2)$(rpath3)$(rpath4)$(rpath5)$(rpath6)$(rpath7)
 malloc_lib  :=
 
-# build depends for rpm spec file
--include build_depends.mak
 # copr/fedora build (with version env vars)
 # copr uses this to generate a source rpm with the srpm target
 -include .copr/Makefile
