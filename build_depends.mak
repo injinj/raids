@@ -1,4 +1,4 @@
-raikv_dep := 1.43
+raikv_dep := 1.44
 h3lib_dep := 4.1
 linecook_dep := 1.6
 raimd_dep := 1.33
