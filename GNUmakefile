@@ -59,7 +59,13 @@ CC          ?= gcc
 CXX         ?= g++
 cc          := $(CC) -std=c11
 cpp         := $(CXX)
-arch_cflags := -mavx -maes -fno-omit-frame-pointer -Wno-stringop-overflow
+ifeq ($(filter $(uname_m),aarch64 arm64),$(uname_m))
+  arch_cflags := -march=armv8-a+crc -fno-omit-frame-pointer
+else ifeq ($(filter $(uname_m),x86_64 i686 i386),$(uname_m))
+  arch_cflags := -mavx -maes -fno-omit-frame-pointer -Wno-stringop-overflow
+else
+  arch_cflags := -fno-omit-frame-pointer
+endif
 gcc_wflags  := -Wall -Wextra
 #-Werror
 # if windows cross compile
@@ -91,6 +97,14 @@ CFLAGS ?= $(build_cflags) $(default_cflags)
 #CFLAGS ?= $(RPM_OPT_FLAGS)
 #endif
 cflags := $(gcc_wflags) $(CFLAGS) $(arch_cflags)
+# -Werror=implicit-function-declaration (via dpkg-buildflags' CFLAGS, folded
+# into $(cflags) above) is a C-only diagnostic; g++ rejects it outright as
+# an invalid -Werror= argument for C++, and since -Wall/-Wextra/-Werror are
+# also active, even an attempted -Wno-error= override of just that one
+# warning gets escalated back into a hard error by the blanket -Werror.
+# Unrelated to architecture -- breaks an x86 build identically -- so C++
+# recipes use this filtered variable instead of $(cflags) directly.
+cxxflags := $(filter-out -Werror=implicit-function-declaration,$(cflags))
 
 INCLUDES  ?= -Iinclude
 DEFINES   ?=
@@ -800,19 +814,19 @@ install: dist_bins
 	install -m 644 include/raids/*.h $(install_prefix)/include/raids
 
 $(objd)/%.o: src/%.cpp
-	$(cpp) $(cflags) $(cppflags) $(includes) $(defines) $($(notdir $*)_includes) $($(notdir $*)_defines) -c $< -o $@
+	$(cpp) $(cxxflags) $(cppflags) $(includes) $(defines) $($(notdir $*)_includes) $($(notdir $*)_defines) -c $< -o $@
 
 $(objd)/%.o: src/%.c
 	$(cc) $(cflags) $(includes) $(defines) $($(notdir $*)_includes) $($(notdir $*)_defines) -c $< -o $@
 
 $(objd)/%.fpic.o: src/%.cpp
-	$(cpp) $(cflags) $(fpicflags) $(cppflags) $(includes) $(defines) $($(notdir $*)_includes) $($(notdir $*)_defines) -c $< -o $@
+	$(cpp) $(cxxflags) $(fpicflags) $(cppflags) $(includes) $(defines) $($(notdir $*)_includes) $($(notdir $*)_defines) -c $< -o $@
 
 $(objd)/%.fpic.o: src/%.c
 	$(cc) $(cflags) $(fpicflags) $(includes) $(defines) $($(notdir $*)_includes) $($(notdir $*)_defines) -c $< -o $@
 
 $(objd)/%.o: test/%.cpp
-	$(cpp) $(cflags) $(cppflags) $(includes) $(defines) $($(notdir $*)_includes) $($(notdir $*)_defines) -c $< -o $@
+	$(cpp) $(cxxflags) $(cppflags) $(includes) $(defines) $($(notdir $*)_includes) $($(notdir $*)_defines) -c $< -o $@
 
 $(objd)/%.o: test/%.c
 	$(cc) $(cflags) $(includes) $(defines) $($(notdir $*)_includes) $($(notdir $*)_defines) -c $< -o $@
